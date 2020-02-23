@@ -1,8 +1,8 @@
 import React from 'react';
-import { View } from 'react-native';
+import MapView from 'react-native-maps';
 
 function Main() {
-    return <View />
+    return <MapView />
 }
 
 export default Main;
