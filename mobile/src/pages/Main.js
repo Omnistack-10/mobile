@@ -4,7 +4,10 @@ import MapView, { Marker, Callout } from 'react-native-maps';
 import { requestPermissionsAsync, getCurrentPositionAsync } from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';
 
+import api from '../services/api';
+
 function Main({ navigation }) {
+    const [devs, setDevs] = useState([]);
     const [currentRegion, setCurrentRegion] = useState(null);
 
     useEffect(() => {
@@ -30,15 +33,44 @@ function Main({ navigation }) {
         loadInitialPosition();
     }, []);
 
+    async function loadDevs() {
+        const { latitude, longitude } = currentRegion;
+
+        const response = await api.get('/search', {
+            params: {
+                latitude,
+                longitude,
+                techs: 'ReactJs'
+            }
+        });
+
+        setDevs(response.data);
+    }
+
+    function handleRegionChanged(region) {
+        console.log(region);
+        setCurrentRegion(region);
+    }
+
     if (!currentRegion) {
         return null;
     }
 
     return (
         <>
-            <MapView initialRegion={currentRegion} style={styles.map}>
-                <Marker coordinate={{ latitude: -19.5460251, longitude: -42.6586987 }}>
-                    <Image style={styles.avatar} source={{ uri: 'https://avatars1.githubusercontent.com/u/45008136?s=460&v=4' }} />
+            <MapView 
+                onRegionChangeComplete={handleRegionChanged} 
+                initialRegion={currentRegion} 
+                style={styles.map}>
+                <Marker 
+                    coordinate={{ 
+                        latitude: -19.5460251, 
+                        longitude: -42.6586987
+                    }}>
+                    <Image 
+                        style={styles.avatar} 
+                        source={{ uri: 'https://avatars1.githubusercontent.com/u/45008136?s=460&v=4' }} 
+                        />
 
                     <Callout onPress={() => {
                         navigation.navigate('Profile', { github_username: 'mayconcarvalho' });
@@ -61,7 +93,7 @@ function Main({ navigation }) {
                     autoCorrect={false}
                 />
 
-                <TouchableOpacity onPress={() => { }} style={styles.loadButton}>
+                <TouchableOpacity onPress={() => {loadDevs}} style={styles.loadButton}>
                     <MaterialIcons name="my-location" size={20} color="#FFF" />
                 </TouchableOpacity>
             </View>
@@ -102,7 +134,7 @@ const styles = StyleSheet.create({
 
     searchForm: {
         position: 'absolute',
-        bottom: 20,
+        top: 20,
         left: 20,
         right: 20,
         zIndex: 5,
